@@ -20,16 +20,17 @@ h3 {
 }
 
 .convert-button {
-  width: 200px;
+  width: 220px;
   padding: 15px;
+  margin: 0 30px;
   background-color:#ED7700;
   color: rgb(255, 255, 255);
   border-radius: 10px;
   border: 0;
-  font-size: 1em;
+  font-size: .5em;
   cursor: pointer;
   outline: none;
   text-transform: uppercase;
   font-weight: 500;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
 }

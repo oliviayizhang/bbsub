@@ -15,12 +15,33 @@ class App extends React.Component {
     event.preventDefault();
     const { userInput } = this.state;
     const subtitleByLine = this.splitLines(userInput)
-    return this.formatForITT(subtitleByLine);
+    const formattedByTimeStamps = this.formatByTimeStamps(subtitleByLine);
+    return this.formatForITT(formattedByTimeStamps);
+  }
+
+  convertToBCC = (event) => {
+    event.preventDefault();
+    const { userInput } = this.state;
+    const subtitleByLine = this.splitLines(userInput).map(line => line.trim());
+    const bccObj = subtitleByLine.map(line => {
+      //extract start & end timing
+      const startAndEndTime = this.extractTiming(line);
+      const [start, end] = startAndEndTime;
+      const startInSeconds = this.convertTimeToSeconds(start).toFixed(2);
+      const endInSeconds = this.convertTimeToSeconds(end).toFixed(2);
+      //extract subtitle text
+      const subtitle = this.extractSubtitle(line);
+      return `{"from":${startInSeconds}, "to":${endInSeconds}, "location":2, "content":"${subtitle}" }`
+    })
+    this.setState({ result: bccObj })
   }
 
   splitLines = (userInput) => {
-    const InputArray = userInput.split('\n').filter(line => line !== '')
-    return InputArray.map(line => line.split('|')).map(line => line.map(str => str.trim()))
+    return userInput.split('\n').filter(line => line !== '')
+  }
+
+  formatByTimeStamps = (inputArray) => {
+    return inputArray.map(line => line.split('|')).map(line => line.map(str => str.trim()))
   }
 
   formatForITT = (subtitleArray) => {
@@ -32,6 +53,19 @@ class App extends React.Component {
       return `<p begin="${formattedStartTime}" end="${formattedEndTime}" region="bottom"><span tts:color="rgba(225,225,225,225)">${subtitle}</span></p>`;
     })
     return this.setState({ result: formattedResult.join('\n') })
+  }
+
+  extractTiming = (input) => {
+      return input.match(/([0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]{2})/g)
+  }
+
+  convertTimeToSeconds = (hms) => {
+    const [hh, mm, ss, ms] = hms.split(':');
+    return (parseInt(hh) * 60 * 60) + (parseInt(mm) * 60) + parseInt(ss) + (parseInt(ms) / 60);
+  }
+
+  extractSubtitle = (input) => {
+    return input.match(/255\)\">(.*?)<\/span>/)[1]
   }
 
   transformTimeFormat = (time) => {
@@ -57,11 +91,12 @@ class App extends React.Component {
                 className="textarea"
               />
             </label>
-            <input type="submit" value="Convert to ITT" className="convert-button"/>
-          </form>
+            <button type="submit" className="convert-button">CONVERT SHORTHAND TO ITT</button>
+            <button type="button" onClick={this.convertToBCC} className="convert-button">CONVERT ITT TO BCC</button>
+          </form> 
         </div>
         <div className="result">
-          <form>
+    
             <label>
               <h3>Result: (**you need to change the end time for the last line)</h3>
               <textarea
@@ -70,7 +105,7 @@ class App extends React.Component {
                 readOnly
               />
             </label>
-          </form>
+         
         </div>
       </div>
     );
