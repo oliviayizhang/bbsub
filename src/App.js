@@ -65,7 +65,9 @@ class App extends React.Component {
   }
 
   extractSubtitle = (input) => {
-    return input.match(/255\)\">(.*?)<\/span>/)[1]
+    let tmp = document.createElement("div");
+    tmp.innerHTML = input;
+    return tmp.textContent || tmp.innerText || "";
   }
 
   transformTimeFormat = (time) => {
